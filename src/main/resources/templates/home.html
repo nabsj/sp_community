@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>커뮤니티 홈</title>
+    <style>
+        body {
+            margin: 0;
+            background: #f5f7fa;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
+        }
+        .top-bar {
+            background: #1e3269;
+            color: #ffffff;
+            padding: 6px 16px;
+            font-size: 12px;
+        }
+        .header {
+            background: #243b82;
+            color: #ffffff;
+            padding: 12px 16px;
+            display: flex;
+            align-items: center;
+            gap: 24px;
+        }
+        .logo {
+            font-size: 24px;
+            font-weight: 700;
+        }
+        .logo span {
+            color: #ffd400;
+        }
+        .search-box {
+            flex: 1;
+            display: flex;
+        }
+        .search-box input {
+            flex: 1;
+            padding: 8px 10px;
+            border: none;
+            border-radius: 4px 0 0 4px;
+            font-size: 14px;
+        }
+        .search-box button {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 0 4px 4px 0;
+            background: #ff6b00;
+            color: #ffffff;
+            font-weight: 600;
+            cursor: pointer;
+        }
+        .login-panel {
+            min-width: 230px;
+            text-align: right;
+            font-size: 12px;
+        }
+        .login-panel form {
+            display: flex;
+            gap: 4px;
+            justify-content: flex-end;
+            align-items: center;
+        }
+        .login-panel input {
+            padding: 4px 6px;
+            font-size: 12px;
+        }
+        .login-panel button {
+            padding: 4px 8px;
+            font-size: 12px;
+            border: none;
+            background: #00aaff;
+            color: #ffffff;
+            cursor: pointer;
+        }
+        .nav {
+            background: #324b9b;
+            color: #ffffff;
+            padding: 6px 16px;
+            font-size: 13px;
+        }
+        .nav a {
+            color: #ffffff;
+            margin-right: 12px;
+            text-decoration: none;
+        }
+        .container {
+            max-width: 1100px;
+            margin: 16px auto;
+            display: flex;
+            gap: 16px;
+        }
+        .main {
+            flex: 3;
+            background: #ffffff;
+            padding: 16px;
+            border-radius: 4px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+        }
+        .sidebar {
+            flex: 1;
+            background: #ffffff;
+            padding: 16px;
+            border-radius: 4px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+            font-size: 12px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 13px;
+        }
+        th, td {
+            padding: 6px 8px;
+            border-bottom: 1px solid #eeeeee;
+            text-align: left;
+        }
+        th {
+            background: #f6f6f8;
+        }
+        tr:hover {
+            background: #fafafa;
+        }
+        .board-name a {
+            font-weight: 600;
+            color: #243b82;
+            text-decoration: none;
+        }
+        .board-name a:hover {
+            text-decoration: underline;
+        }
+        .small {
+            font-size: 11px;
+            color: #666666;
+        }
+    </style>
+</head>
+<body>
+<div class="top-bar">
+    오늘 <span th:text="${#lists.size(boards)}">0</span>개 커뮤니티
+</div>
+
+<div class="header">
+    <div class="logo">
+        핸디줘<span>.community</span>
+    </div>
+
+    <div class="search-box">
+        <input type="text" placeholder="갤러리 & 통합검색 (아직 기능 없음)">
+        <button type="button">검색</button>
+    </div>
+
+    <!-- 로그인 안 된 경우 -->
+    <div class="login-panel" th:if="${currentUser == null}">
+        <form th:action="@{/login}" method="post">
+            <input type="text" name="username" placeholder="아이디">
+            <input type="password" name="password" placeholder="비밀번호">
+            <button type="submit">로그인</button>
+            <a th:href="@{/members/new}" style="color:#ffd400; text-decoration:none;">회원가입</a>
+        </form>
+    </div>
+
+    <!-- 로그인 된 경우 -->
+    <div class="login-panel" th:if="${currentUser != null}">
+        <div>
+            <strong th:text="${currentUser.nickname}">닉네임</strong> 님
+        </div>
+        <div style="margin-top:4px;">
+            <a th:href="@{/account/settings}"
+            style="color:#ffd400; text-decoration:none; margin-right:6px;">계정설정</a>
+        </div>
+        <form th:action="@{/logout}" method="post" style="margin-top:4px;">
+            <button type="submit">로그아웃</button>
+        </form>
+    </div>
+</div>
+
+<div class="nav">
+    <a href="#" onclick="return false;">갤러리</a>
+    <a href="#" onclick="return false;">볼링</a>
+    <a href="#" onclick="return false;">유머</a>
+    <a href="#" onclick="return false;">개발</a>
+    <a th:href="@{/}">홈</a>
+</div>
+
+<div class="container">
+    <div class="main">
+        <h2 style="margin-top:0;">커뮤니티 목록</h2>
+
+        <table>
+            <thead>
+            <tr>
+                <th style="width:60px;">번호</th>
+                <th>이름</th>
+                <th>설명</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="board, stat : ${boards}">
+                <td th:text="${stat.count}"></td>
+                <td class="board-name">
+                    <a th:href="@{|/boards/${board.id}|}"
+                       th:text="${board.name}"></a>
+                </td>
+                <td th:text="${board.description}"></td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <div class="sidebar">
+        <h3 style="margin-top:0;">HOT 커뮤니티 (예시)</h3>
+        <ul class="small">
+            <li th:each="board : ${boards}">
+                <a th:href="@{|/boards/${board.id}|}"
+                   th:text="${board.name}"
+                   style="text-decoration:none; color:#243b82;"></a>
+            </li>
+        </ul>
+        <hr>
+        <div class="small">
+            여기에는 나중에<br>실시간 베스트 / 광고<br>같은 걸 넣으면 됨.
+        </div>
+    </div>
+</div>
+
+</body>
+</html>

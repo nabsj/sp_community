@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title th:text="${board.name} + ' - 게시판'">게시판</title>
+</head>
+<body>
+<h1 th:text="${board.name} + ' 게시판'">게시판</h1>
+
+<div>
+    <a th:href="@{/}">홈으로</a>
+    &nbsp;|&nbsp;
+    <a th:href="@{/login}">로그인</a>
+    &nbsp;|&nbsp;
+    <a th:href="@{/members/new}">회원가입</a>
+</div>
+<hr>
+
+<a th:href="@{|/boards/${board.id}/posts/new|}">글 쓰기</a>
+<hr>
+
+<table border="1" cellpadding="8">
+    <thead>
+    <tr>
+        <th>번호</th>
+        <th>제목</th>
+        <th>글쓴이</th>
+        <th>작성일</th>
+        <th>조회수</th>
+        <th>추천</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr th:each="post : ${posts}">
+        <!-- 게시글 번호: 여기선 id 사용 -->
+        <td th:text="${post.id}"></td>
+        <td>
+            <a th:href="@{|/boards/${board.id}/posts/${post.id}|}"
+               th:text="${post.title}"></a>
+        </td>
+        <td th:text="${post.writer}"></td>
+        <td th:text="${#temporals.format(post.createdAt, 'yyyy-MM-dd HH:mm')}"></td>
+        <td th:text="${post.viewCount}"></td>
+        <td th:text="${post.recommendCount}"></td>
+    </tr>
+    </tbody>
+</table>
+
+</body>
+</html>

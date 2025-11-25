@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title th:text="${post.title}">게시글</title>
+</head>
+<body>
+<h1 th:text="${post.title}">제목</h1>
+
+<p>
+    게시판: <span th:text="${board.name}"></span><br>
+    글쓴이: <span th:text="${post.writer}"></span><br>
+    작성일: <span th:text="${#temporals.format(post.createdAt, 'yyyy-MM-dd HH:mm')}"></span><br>
+    조회수: <span th:text="${post.viewCount}"></span><br>
+    추천: <span th:text="${post.recommendCount}"></span>
+</p>
+<hr>
+<div>
+    <pre th:text="${post.content}"></pre>
+</div>
+<hr>
+<a th:href="@{|/boards/${board.id}|}">목록으로</a>
+</body>
+</html>

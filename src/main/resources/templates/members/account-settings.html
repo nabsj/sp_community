@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>계정 설정</title>
+    <style>
+        body {
+            margin: 0;
+            background: #f5f5f7;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
+        }
+        .wrapper {
+            max-width: 960px;
+            margin: 40px auto;
+            background: #ffffff;
+            border-radius: 4px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.12);
+            padding: 32px 48px;
+        }
+        h1 {
+            font-size: 20px;
+            margin: 0 0 24px 0;
+            border-bottom: 2px solid #e5e5e5;
+            padding-bottom: 12px;
+        }
+        .section-title {
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+        .field-row {
+            margin-bottom: 12px;
+        }
+        label {
+            display: block;
+            font-size: 13px;
+            margin-bottom: 4px;
+            color: #444;
+        }
+        input[type="text"],
+        input[type="password"] {
+            width: 280px;
+            padding: 6px 8px;
+            border: 1px solid #ccc;
+            border-radius: 3px;
+            font-size: 13px;
+        }
+        input[readonly] {
+            background: #f5f5f5;
+        }
+        .btn-primary {
+            padding: 6px 16px;
+            background: #324b9b;
+            border: none;
+            color: #ffffff;
+            font-size: 13px;
+            border-radius: 3px;
+            cursor: pointer;
+        }
+        .btn-secondary {
+            padding: 6px 12px;
+            background: #e0e0e0;
+            border: none;
+            font-size: 12px;
+            border-radius: 3px;
+            cursor: pointer;
+        }
+        .help-box {
+            background: #f9fafc;
+            border: 1px solid #e0e3ea;
+            padding: 12px 16px;
+            font-size: 12px;
+            margin-bottom: 20px;
+            line-height: 1.6;
+        }
+        .help-box b {
+            color: #c62828;
+        }
+        .message {
+            font-size: 12px;
+            margin-top: 6px;
+        }
+        .message.ok {
+            color: #2e7d32;
+        }
+        .message.error {
+            color: #c62828;
+        }
+        .section {
+            margin-bottom: 32px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="wrapper">
+    <h1>계정 설정</h1>
+
+    <!-- 아이디 / 닉네임 설정 -->
+    <div class="section">
+        <div class="section-title">기본 정보</div>
+
+        <div class="field-row">
+            <label>아이디</label>
+            <input type="text" th:value="${member.username}" readonly>
+        </div>
+
+        <form th:action="@{/account/nickname}" method="post">
+            <div class="field-row">
+                <label>닉네임</label>
+                <input type="text" name="nickname" th:value="${member.nickname}">
+                <button type="submit" class="btn-primary" style="margin-left:8px;">닉네임 변경</button>
+            </div>
+            <div class="message ok" th:if="${nicknameMessage != null}"
+                 th:text="${nicknameMessage}"></div>
+        </form>
+    </div>
+
+    <!-- 비밀번호 변경 영역 -->
+    <div class="section">
+        <div class="section-title">비밀번호 변경</div>
+
+        <div class="help-box">
+            <p><b>비밀번호는 주기적으로 변경하여 주시기 바랍니다.</b></p>
+            <p>
+                비밀번호를 변경한지
+                <b th:text="${passwordDays}">0</b>일 되었습니다.
+            </p>
+            <p>
+                영문, 숫자, 특수문자 조합하여 8~20자로 설정해 주시기 바랍니다.
+                (대소문자를 조합하시면 더욱 안전합니다.)
+            </p>
+            <p>
+                영문, 숫자 동일 및 연속 3자리 또는 특수문자 동일 3자리 사용 불가합니다.
+                예) 123, 111, abc, aaa, !!!
+            </p>
+            <p>
+                식별 코드, 닉네임과 동일한 비밀번호는 사용할 수 없습니다.
+            </p>
+        </div>
+
+        <form th:action="@{/account/password}" method="post">
+            <div class="field-row">
+                <label>현재 비밀번호</label>
+                <input type="password" name="currentPassword" placeholder="현재 비밀번호">
+            </div>
+            <div class="field-row">
+                <label>새 비밀번호</label>
+                <input type="password" name="newPassword" placeholder="새 비밀번호">
+            </div>
+            <div class="field-row">
+                <label>새 비밀번호 확인</label>
+                <input type="password" name="confirmPassword" placeholder="새 비밀번호 확인">
+            </div>
+
+            <button type="submit" class="btn-primary">확인</button>
+        </form>
+
+        <div class="message" th:if="${passwordMessage != null}"
+             th:classappend="${#strings.contains(passwordMessage, '변경되었습니다')} ? ' ok' : ' error'"
+             th:text="${passwordMessage}"></div>
+    </div>
+
+    <button class="btn-secondary" onclick="location.href='/'">홈으로</button>
+</div>
+
+</body>
+</html>
