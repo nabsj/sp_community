@@ -4,7 +4,7 @@ import com.example.community.board.Board;
 import com.example.community.board.BoardService;
 import com.example.community.member.Member;
 import com.example.community.member.MemberService;
-import org.springframework.security.core.Authentication;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -31,17 +31,17 @@ public class PostController {
      * GET /boards/{boardId}/posts/new
      */
     @GetMapping("/new")
-    public String showWriteForm(@PathVariable("boardId") Long boardId,
-                                Authentication authentication,
+    public String showWriteForm(@PathVariable Long boardId,
+                                @AuthenticationPrincipal UserDetails userDetails,
                                 Model model) {
 
         Board board = boardService.getBoard(boardId);
         model.addAttribute("board", board);
 
-        boolean loggedIn = authentication != null && authentication.isAuthenticated();
+        boolean loggedIn = (userDetails != null);
         model.addAttribute("loggedIn", loggedIn);
 
-        if (loggedIn && authentication.getPrincipal() instanceof UserDetails userDetails) {
+        if (loggedIn) {
             Member member = memberService.findByUsername(userDetails.getUsername());
             model.addAttribute("writerDisplay", member.getNickname());
         } else {
@@ -58,8 +58,8 @@ public class PostController {
      * POST /boards/{boardId}/posts/new
      */
     @PostMapping("/new")
-    public String createPost(@PathVariable("boardId") Long boardId,
-                             Authentication authentication,
+    public String createPost(@PathVariable Long boardId,
+                             @AuthenticationPrincipal UserDetails userDetails,
                              @RequestParam String title,
                              @RequestParam String content,
                              @RequestParam(required = false) String guestNickname,
@@ -68,19 +68,19 @@ public class PostController {
 
         Board board = boardService.getBoard(boardId);
 
-        boolean loggedIn = authentication != null && authentication.isAuthenticated();
+        boolean loggedIn = (userDetails != null);
         Member member = null;
-        if (loggedIn && authentication.getPrincipal() instanceof UserDetails userDetails) {
+        if (loggedIn) {
             member = memberService.findByUsername(userDetails.getUsername());
         }
 
-        // 제목/내용 필수
+        // 기본 검증
         if (title == null || title.trim().isEmpty()
                 || content == null || content.trim().isEmpty()) {
 
             model.addAttribute("board", board);
             model.addAttribute("loggedIn", loggedIn);
-            model.addAttribute("writerDisplay", loggedIn && member != null ? member.getNickname() : "손님");
+            model.addAttribute("writerDisplay", loggedIn ? member.getNickname() : "손님");
             model.addAttribute("errorMessage", "제목과 내용을 입력해 주세요.");
 
             return "posts/form";
@@ -100,16 +100,16 @@ public class PostController {
             }
         }
 
-        // 실제 저장
+        // 실제 저장 로직
+        String writerName = loggedIn ? member.getNickname() : guestNickname;
         Post post = postService.createPost(
                 board,
-                member,
-                guestNickname,
-                guestPassword,
+                writerName,   // 화면에 보이는 작성자 이름
                 title,
                 content
         );
 
+        // 등록 후 해당 글 상세 페이지로 이동
         return "redirect:/boards/" + boardId + "/posts/" + post.getId();
     }
 
@@ -118,18 +118,55 @@ public class PostController {
      * GET /boards/{boardId}/posts/{postId}
      */
     @GetMapping("/{postId}")
-    public String viewPost(@PathVariable("boardId") Long boardId,
+    public String viewPost(@PathVariable Long boardId,
                            @PathVariable Long postId,
-                           Authentication authentication,
+                           @AuthenticationPrincipal UserDetails userDetails,
                            Model model) {
 
         Board board = boardService.getBoard(boardId);
         Post post = postService.getPostAndIncreaseViewCount(boardId, postId);
 
+        boolean loggedIn = (userDetails != null);
+        Member member = null;
+        boolean alreadyRecommended = false;
+
+        if (loggedIn) {
+            try {
+                member = memberService.findByUsername(userDetails.getUsername());
+                alreadyRecommended = postService.hasUserRecommended(post, member);
+            } catch (Exception e) {
+                // Member 못 찾거나 에러 나도 그냥 "추천 안 한 걸로" 처리
+                alreadyRecommended = false;
+            }
+        }
+
         model.addAttribute("board", board);
         model.addAttribute("post", post);
-        model.addAttribute("currentUser", authentication);
+        model.addAttribute("currentUser", userDetails);
+        model.addAttribute("alreadyRecommended", alreadyRecommended);
 
         return "posts/detail";
+    }
+
+    /**
+     * 추천하기
+     * POST /boards/{boardId}/posts/{postId}/recommend
+     */
+    @PostMapping("/{postId}/recommend")
+    public String recommend(@PathVariable Long boardId,
+                            @PathVariable Long postId,
+                            @AuthenticationPrincipal UserDetails userDetails) {
+
+        // 비회원이면 로그인 화면으로
+        if (userDetails == null) {
+            return "redirect:/login";
+        }
+
+        Post post = postService.getPost(boardId, postId);
+        Member member = memberService.findByUsername(userDetails.getUsername());
+
+        postService.recommendPost(post, member);
+
+        return "redirect:/boards/" + boardId + "/posts/" + postId;
     }
 }

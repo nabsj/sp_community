@@ -2,132 +2,139 @@
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <title th:text="${post.title} + ' - ' + ${board.name}">게시글</title>
+    <title th:text="${post.title} + ' - 게시글'">게시글</title>
     <style>
         body {
             margin: 0;
-            background: #f5f5f7;
+            background: #f5f7fa;
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
-        }
-        a {
-            text-decoration: none;
-            color: inherit;
         }
         .wrapper {
             max-width: 960px;
-            margin: 32px auto;
+            margin: 20px auto 40px;
             background: #ffffff;
             border-radius: 4px;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.12);
+            box-shadow: 0 1px 3px rgba(0,0,0,0.08);
             padding: 24px 32px 32px;
         }
-        .nav {
-            font-size: 13px;
-            color: #555;
-            margin-bottom: 8px;
-        }
-        .nav a {
-            color: #324b9b;
-        }
-        .nav span.sep {
-            margin: 0 6px;
-            color: #aaa;
-        }
-        .title {
-            font-size: 20px;
-            font-weight: 600;
-            margin: 4px 0 10px 0;
-        }
-        .meta {
-            font-size: 12px;
-            color: #666;
-            border-top: 1px solid #e0e0e0;
-            border-bottom: 1px solid #e0e0e0;
-            padding: 8px 4px;
+        .post-header {
+            border-bottom: 1px solid #e5e5e5;
+            padding-bottom: 12px;
             margin-bottom: 16px;
         }
-        .meta span {
-            margin-right: 16px;
+        .post-title {
+            font-size: 20px;
+            margin: 0 0 6px 0;
         }
-        .content-box {
-            padding: 10px 4px 24px 4px;
+        .post-meta {
+            font-size: 12px;
+            color: #777;
+        }
+        .post-meta span {
+            margin-right: 12px;
+        }
+        .post-content {
             font-size: 14px;
             line-height: 1.7;
             white-space: pre-wrap;
+            margin-bottom: 24px;
         }
-        .btn-area {
-            margin-top: 10px;
-            text-align: right;
+        .post-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-top: 1px solid #e5e5e5;
+            padding-top: 12px;
+            font-size: 13px;
         }
-        .btn-secondary {
-            padding: 6px 16px;
-            background: #e0e0e0;
-            border-radius: 3px;
+        .btn {
             border: none;
+            border-radius: 3px;
+            padding: 6px 14px;
             font-size: 13px;
             cursor: pointer;
-            margin-left: 6px;
         }
         .btn-primary {
-            padding: 6px 16px;
             background: #324b9b;
-            border-radius: 3px;
-            border: none;
             color: #fff;
-            font-size: 13px;
-            cursor: pointer;
-            margin-left: 6px;
         }
-        .btn-primary:hover {
-            background: #273a79;
+        .btn-outline {
+            background: #fff;
+            color: #324b9b;
+            border: 1px solid #324b9b;
+        }
+        .badge {
+            display: inline-block;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-size: 11px;
+            background: #f0f0f5;
+            color: #555;
+            margin-left: 6px;
         }
     </style>
 </head>
 <body>
 
-<th:block th:replace="fragments/header :: siteHeader"></th:block>
-
+<!-- 공통 상단 헤더 -->
+<th:block th:replace="~{fragments/header :: siteHeader}"></th:block>
 
 <div class="wrapper">
 
-    <div class="nav">
-        <a th:href="@{/}">홈</a>
-        <span class="sep">/</span>
-        <a th:href="@{|/boards/${board.id}|}" th:text="${board.name}">게시판</a>
-        <span class="sep">/</span>
-        <span>게시글</span>
+    <!-- 상단 제목/메타 정보 -->
+    <div class="post-header">
+        <h1 class="post-title" th:text="${post.title}">제목</h1>
+        <div class="post-meta">
+            <span>게시판: <strong th:text="${board.name}">게시판명</strong></span>
+            <span>글쓴이: <strong th:text="${post.writer}">작성자</strong></span>
+            <span th:text="${#temporals.format(post.createdAt, 'yyyy-MM-dd HH:mm')}">2025-11-25 12:00</span>
+            <span>조회 <span th:text="${post.viewCount}">0</span></span>
+            <span>추천 <span th:text="${post.recommendCount}">0</span></span>
+        </div>
     </div>
 
-    <h1 class="title" th:text="${post.title}">제목</h1>
-
-    <div class="meta">
-        <span>글쓴이:
-            <strong th:text="${post.writer}">작성자</strong>
-        </span>
-        <span>작성일:
-            <span th:text="${#temporals.format(post.createdAt, 'yyyy-MM-dd HH:mm')}">2025-01-01 12:00</span>
-        </span>
-        <span>조회:
-            <span th:text="${post.viewCount}">0</span>
-        </span>
-        <span>추천:
-            <span th:text="${post.recommendCount}">0</span>
-        </span>
-    </div>
-
-    <div class="content-box" th:text="${post.content}">
+    <!-- 본문 -->
+    <div class="post-content" th:text="${post.content}">
         내용
     </div>
 
-    <div class="btn-area">
-        <button class="btn-secondary"
-                th:onclick="|location.href='/boards/${board.id}'|">
-            목록
-        </button>
-        <button class="btn-primary"
-                th:onclick="|location.href='/boards/${board.id}/posts/new'|">
-            새 글 쓰기
-        </button>
+    <!-- 하단 버튼/추천 영역 -->
+    <div class="post-footer">
+
+        <!-- 왼쪽: 목록으로 -->
+        <div>
+            <a th:href="@{|/boards/${board.id}|}">
+                <button type="button" class="btn btn-outline">목록으로</button>
+            </a>
+        </div>
+
+        <!-- 오른쪽: 추천 영역 -->
+        <div>
+            <!-- 로그인 안 한 경우: 추천 불가능 문구 -->
+            <span th:if="${currentUser == null}">
+                <span class="badge">로그인 후 추천 가능합니다</span>
+            </span>
+
+            <!-- 로그인 한 경우 -->
+            <span th:if="${currentUser != null}">
+                <!-- 이미 추천한 경우 -->
+                <span th:if="${alreadyRecommended}">
+                    <span class="badge">이미 추천한 글입니다</span>
+                </span>
+
+                <!-- 아직 추천 안 한 경우: 추천 버튼 -->
+                <span th:if="${!alreadyRecommended}">
+                    <form th:action="@{|/boards/${board.id}/posts/${post.id}/recommend|}"
+                          method="post"
+                          style="display:inline;">
+                        <!-- 🔥 CSRF 비활성화 상태라 hidden _csrf 토큰은 넣지 않는다 -->
+                        <button type="submit" class="btn btn-primary">
+                            추천하기 👍
+                        </button>
+                    </form>
+                </span>
+            </span>
+        </div>
     </div>
 
 </div>
