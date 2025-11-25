@@ -2,23 +2,135 @@
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <title th:text="${post.title}">게시글</title>
+    <title th:text="${post.title} + ' - ' + ${board.name}">게시글</title>
+    <style>
+        body {
+            margin: 0;
+            background: #f5f5f7;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
+        }
+        a {
+            text-decoration: none;
+            color: inherit;
+        }
+        .wrapper {
+            max-width: 960px;
+            margin: 32px auto;
+            background: #ffffff;
+            border-radius: 4px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.12);
+            padding: 24px 32px 32px;
+        }
+        .nav {
+            font-size: 13px;
+            color: #555;
+            margin-bottom: 8px;
+        }
+        .nav a {
+            color: #324b9b;
+        }
+        .nav span.sep {
+            margin: 0 6px;
+            color: #aaa;
+        }
+        .title {
+            font-size: 20px;
+            font-weight: 600;
+            margin: 4px 0 10px 0;
+        }
+        .meta {
+            font-size: 12px;
+            color: #666;
+            border-top: 1px solid #e0e0e0;
+            border-bottom: 1px solid #e0e0e0;
+            padding: 8px 4px;
+            margin-bottom: 16px;
+        }
+        .meta span {
+            margin-right: 16px;
+        }
+        .content-box {
+            padding: 10px 4px 24px 4px;
+            font-size: 14px;
+            line-height: 1.7;
+            white-space: pre-wrap;
+        }
+        .btn-area {
+            margin-top: 10px;
+            text-align: right;
+        }
+        .btn-secondary {
+            padding: 6px 16px;
+            background: #e0e0e0;
+            border-radius: 3px;
+            border: none;
+            font-size: 13px;
+            cursor: pointer;
+            margin-left: 6px;
+        }
+        .btn-primary {
+            padding: 6px 16px;
+            background: #324b9b;
+            border-radius: 3px;
+            border: none;
+            color: #fff;
+            font-size: 13px;
+            cursor: pointer;
+            margin-left: 6px;
+        }
+        .btn-primary:hover {
+            background: #273a79;
+        }
+    </style>
 </head>
 <body>
-<h1 th:text="${post.title}">제목</h1>
 
-<p>
-    게시판: <span th:text="${board.name}"></span><br>
-    글쓴이: <span th:text="${post.writer}"></span><br>
-    작성일: <span th:text="${#temporals.format(post.createdAt, 'yyyy-MM-dd HH:mm')}"></span><br>
-    조회수: <span th:text="${post.viewCount}"></span><br>
-    추천: <span th:text="${post.recommendCount}"></span>
-</p>
-<hr>
-<div>
-    <pre th:text="${post.content}"></pre>
+<th:block th:replace="fragments/header :: siteHeader"></th:block>
+
+
+<div class="wrapper">
+
+    <div class="nav">
+        <a th:href="@{/}">홈</a>
+        <span class="sep">/</span>
+        <a th:href="@{|/boards/${board.id}|}" th:text="${board.name}">게시판</a>
+        <span class="sep">/</span>
+        <span>게시글</span>
+    </div>
+
+    <h1 class="title" th:text="${post.title}">제목</h1>
+
+    <div class="meta">
+        <span>글쓴이:
+            <strong th:text="${post.writer}">작성자</strong>
+        </span>
+        <span>작성일:
+            <span th:text="${#temporals.format(post.createdAt, 'yyyy-MM-dd HH:mm')}">2025-01-01 12:00</span>
+        </span>
+        <span>조회:
+            <span th:text="${post.viewCount}">0</span>
+        </span>
+        <span>추천:
+            <span th:text="${post.recommendCount}">0</span>
+        </span>
+    </div>
+
+    <div class="content-box" th:text="${post.content}">
+        내용
+    </div>
+
+    <div class="btn-area">
+        <button class="btn-secondary"
+                th:onclick="|location.href='/boards/${board.id}'|">
+            목록
+        </button>
+        <button class="btn-primary"
+                th:onclick="|location.href='/boards/${board.id}/posts/new'|">
+            새 글 쓰기
+        </button>
+    </div>
+
 </div>
-<hr>
-<a th:href="@{|/boards/${board.id}|}">목록으로</a>
+
 </body>
 </html>

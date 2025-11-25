@@ -2,6 +2,7 @@ package com.example.community.post;
 
 import com.example.community.board.Board;
 import jakarta.persistence.*;
+
 import java.time.LocalDateTime;
 
 @Entity
@@ -12,27 +13,35 @@ public class Post {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    // 어떤 커뮤니티(게시판)에 속하는 글인지
+    // 어떤 게시판의 글인지
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "board_id")
+    @JoinColumn(name = "board_id", nullable = false)
     private Board board;
 
+    @Column(nullable = false, length = 200)
     private String title;
 
-    @Column(columnDefinition = "TEXT")
+    @Lob
+    @Column(nullable = false)
     private String content;
 
+    // 화면에 보여줄 작성자 이름 (회원이면 닉네임, 비회원이면 입력한 닉네임/익명)
+    @Column(nullable = false, length = 50)
     private String writer;
 
+    @Column(nullable = false)
+    private long viewCount = 0L;
+
+    @Column(nullable = false)
+    private long recommendCount = 0L;
+
+    @Column(nullable = false)
     private LocalDateTime createdAt;
 
-    // 조회수
-    private Long viewCount = 0L;
+    @Column(nullable = false)
+    private LocalDateTime updatedAt;
 
-    // 추천수
-    private Long recommendCount = 0L;
-
-    public Post() {
+    protected Post() {
     }
 
     public Post(Board board, String title, String content, String writer) {
@@ -40,23 +49,29 @@ public class Post {
         this.title = title;
         this.content = content;
         this.writer = writer;
-        this.createdAt = LocalDateTime.now();
     }
 
     @PrePersist
     public void prePersist() {
-        if (createdAt == null) {
-            createdAt = LocalDateTime.now();
-        }
-        if (viewCount == null) {
-            viewCount = 0L;
-        }
-        if (recommendCount == null) {
-            recommendCount = 0L;
-        }
+        LocalDateTime now = LocalDateTime.now();
+        this.createdAt = now;
+        this.updatedAt = now;
     }
 
-    // getter / setter
+    @PreUpdate
+    public void preUpdate() {
+        this.updatedAt = LocalDateTime.now();
+    }
+
+    public void increaseViewCount() {
+        this.viewCount++;
+    }
+
+    public void increaseRecommendCount() {
+        this.recommendCount++;
+    }
+
+    // ===== getter / setter =====
 
     public Long getId() {
         return id;
@@ -94,27 +109,27 @@ public class Post {
         this.writer = writer;
     }
 
+    public long getViewCount() {
+        return viewCount;
+    }
+
+    public void setViewCount(long viewCount) {
+        this.viewCount = viewCount;
+    }
+
+    public long getRecommendCount() {
+        return recommendCount;
+    }
+
+    public void setRecommendCount(long recommendCount) {
+        this.recommendCount = recommendCount;
+    }
+
     public LocalDateTime getCreatedAt() {
         return createdAt;
     }
 
-    public void setCreatedAt(LocalDateTime createdAt) {
-        this.createdAt = createdAt;
-    }
-
-    public Long getViewCount() {
-        return viewCount;
-    }
-
-    public void setViewCount(Long viewCount) {
-        this.viewCount = viewCount;
-    }
-
-    public Long getRecommendCount() {
-        return recommendCount;
-    }
-
-    public void setRecommendCount(Long recommendCount) {
-        this.recommendCount = recommendCount;
+    public LocalDateTime getUpdatedAt() {
+        return updatedAt;
     }
 }

@@ -7,6 +7,6 @@ import java.util.List;
 
 public interface PostRepository extends JpaRepository<Post, Long> {
 
-    // 특정 게시판의 글 목록 (최신 글이 위로)
+    // 게시판별 최신 글 목록
     List<Post> findByBoardOrderByIdDesc(Board board);
 }

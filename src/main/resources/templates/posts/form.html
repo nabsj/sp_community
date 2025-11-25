@@ -1,4 +1,193 @@
-<p>
-    작성자:
-    <strong th:text="${writerDisplay}"></strong>
-</p>
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title th:text="${board.name} + ' 글쓰기'">글쓰기</title>
+    <style>
+        body {
+            margin: 0;
+            background: #f5f7fa;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
+        }
+        .write-wrapper {
+            max-width: 1000px;
+            margin: 20px auto;
+            background: #ffffff;
+            border-radius: 4px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.12);
+            padding: 16px 20px 24px;
+            font-size: 13px;
+        }
+        .write-header {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 12px;
+        }
+        .write-header .board-name {
+            font-size: 16px;
+            font-weight: 700;
+        }
+        .write-header .desc {
+            font-size: 12px;
+            color: #777;
+        }
+        .field-row {
+            margin-bottom: 10px;
+        }
+        .field-row label {
+            display: inline-block;
+            width: 70px;
+            font-weight: 600;
+        }
+        .field-row input[type="text"],
+        .field-row input[type="password"] {
+            width: 260px;
+            padding: 5px 7px;
+            border: 1px solid #ccc;
+            border-radius: 3px;
+            font-size: 13px;
+        }
+        .field-row-title input[type="text"] {
+            width: 100%;
+            padding: 7px 9px;
+            border: 1px solid #ccc;
+            border-radius: 3px;
+            font-size: 14px;
+        }
+        .writer-label {
+            font-weight: 600;
+            margin-right: 6px;
+        }
+        .writer-name {
+            font-weight: 600;
+            color: #243b82;
+        }
+        .error-message {
+            color: #c62828;
+            font-size: 12px;
+            margin-bottom: 8px;
+        }
+        .editor-wrapper {
+            border: 1px solid #ccc;
+            border-radius: 3px;
+            margin-top: 10px;
+        }
+        .editor-toolbar {
+            padding: 6px 8px;
+            border-bottom: 1px solid #e0e0e0;
+            background: #fafafa;
+            font-size: 12px;
+            color: #555;
+        }
+        .editor-toolbar span {
+            margin-right: 8px;
+        }
+        .editor-textarea {
+            width: 100%;
+            height: 400px;
+            border: none;
+            padding: 8px 10px;
+            resize: vertical;
+            font-size: 13px;
+            line-height: 1.5;
+            outline: none;
+        }
+        .write-bottom {
+            margin-top: 14px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .btn-primary {
+            padding: 8px 24px;
+            border: none;
+            border-radius: 3px;
+            background: #324b9b;
+            color: #fff;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+        .btn-secondary {
+            padding: 7px 16px;
+            border: none;
+            border-radius: 3px;
+            background: #e0e0e0;
+            font-size: 13px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+
+<!-- 공통 상단 헤더 -->
+<th:block th:replace="fragments/header :: siteHeader"></th:block>
+
+<div class="write-wrapper">
+
+    <div class="write-header">
+        <div class="board-name" th:text="${board.name} + ' 글쓰기'">게시판 글쓰기</div>
+        <div class="desc">게시글을 작성해 주세요.</div>
+    </div>
+
+    <!-- 에러 메시지 -->
+    <div th:if="${errorMessage != null}" class="error-message"
+         th:text="${errorMessage}"></div>
+
+    <!-- 글쓰기 폼 -->
+    <form th:action="@{|/boards/${board.id}/posts/new|}" method="post">
+        <!-- 필요하면 CSRF hidden 추가 (지금 회원가입에 쓰고 있다면 똑같이) -->
+        <!-- <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/> -->
+
+        <!-- 제목 -->
+        <div class="field-row field-row-title">
+            <input type="text" name="title" placeholder="제목을 입력해 주세요.">
+        </div>
+
+        <!-- 작성자 영역 -->
+        <!-- 로그인한 회원인 경우: 닉네임만 표시 -->
+        <div class="field-row" th:if="${loggedIn}">
+            <span class="writer-label">작성자</span>
+            <span class="writer-name" th:text="${writerDisplay}">회원닉네임</span>
+        </div>
+
+        <!-- 비회원인 경우: 닉네임 + 비밀번호 입력 -->
+        <div th:if="${!loggedIn}">
+            <div class="field-row">
+                <label for="guestNickname">닉네임</label>
+                <input type="text" id="guestNickname" name="guestNickname"
+                       placeholder="닉네임을 입력해 주세요.">
+            </div>
+            <div class="field-row">
+                <label for="guestPassword">비밀번호</label>
+                <input type="password" id="guestPassword" name="guestPassword"
+                       placeholder="비밀번호 (삭제시 본인 확인용)">
+            </div>
+        </div>
+
+        <!-- 에디터(본문) -->
+        <div class="editor-wrapper">
+            <div class="editor-toolbar">
+                <span>본문 작성</span>
+                <span style="color:#999;">(지금은 기본 텍스트, 나중에 에디터 붙일 수 있음)</span>
+            </div>
+            <textarea class="editor-textarea" name="content"
+                      placeholder="내용을 입력해 주세요."></textarea>
+        </div>
+
+        <div class="write-bottom">
+            <div style="font-size:12px; color:#777;">
+                ※ 욕설, 비방, 음란, 불법 게시물은 운영 정책에 따라 삭제될 수 있습니다.
+            </div>
+            <div>
+                <button type="button" class="btn-secondary"
+                        th:onclick="|location.href='/boards/${board.id}'|">취소</button>
+                <button type="submit" class="btn-primary">등록</button>
+            </div>
+        </div>
+    </form>
+</div>
+
+</body>
+</html>

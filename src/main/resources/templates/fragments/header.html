@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+
+<!-- 다른 템플릿에서 th:replace 로 가져다 쓸 fragment -->
+<th:block th:fragment="siteHeader">
+
+    <style>
+        /* 상단 공통 헤더용 간단 스타일 */
+        .hd-topbar {
+            background: #163278;
+            color: #fff;
+            padding: 10px 24px;
+        }
+        .hd-top-inner {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            align-items: center;
+        }
+        .hd-logo a {
+            display: inline-flex;
+            align-items: baseline;
+            text-decoration: none;
+        }
+        .hd-logo-main {
+            font-size: 24px;
+            font-weight: 800;
+            color: #ffe600;
+        }
+        .hd-logo-sub {
+            font-size: 22px;
+            font-weight: 700;
+            color: #ffffff;
+            margin-left: 2px;
+        }
+
+        .hd-search {
+            flex: 1;
+            margin: 0 24px;
+            display: flex;
+        }
+        .hd-search-input {
+            flex: 1;
+            padding: 7px 10px;
+            border: none;
+            border-radius: 4px 0 0 4px;
+            font-size: 13px;
+        }
+        .hd-search-btn {
+            border: none;
+            padding: 0 20px;
+            font-size: 14px;
+            font-weight: 600;
+            background: #ff7a00;
+            color: #fff;
+            border-radius: 0 4px 4px 0;
+            cursor: pointer;
+        }
+
+        .hd-right {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 13px;
+        }
+        .hd-right .nickname {
+            font-weight: 600;
+        }
+        .hd-link {
+            color: #fff;
+            text-decoration: none;
+            padding: 4px 6px;
+        }
+        .hd-btn-login, .hd-btn-join {
+            padding: 6px 12px;
+            border-radius: 3px;
+            font-size: 13px;
+            text-decoration: none;
+        }
+        .hd-btn-login {
+            background: #00a0ff;
+            color: #fff;
+        }
+        .hd-btn-join {
+            background: #444;
+            color: #fff;
+        }
+
+        .hd-nav {
+            background: #22419c;
+        }
+        .hd-nav-inner {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            gap: 24px;
+            padding: 8px 24px;
+        }
+        .hd-nav-link {
+            color: #fff;
+            text-decoration: none;
+            font-size: 14px;
+            font-weight: 500;
+        }
+    </style>
+
+    <!-- 상단 1줄 (로고 / 검색 / 로그인 영역) -->
+    <header class="hd-topbar">
+        <div class="hd-top-inner">
+
+            <!-- 로고 클릭 시 항상 홈(/) 으로 이동 -->
+            <div class="hd-logo">
+                <a th:href="@{/}">
+                    <span class="hd-logo-main">핸디줘</span>
+                    <span class="hd-logo-sub">.community</span>
+                </a>
+            </div>
+
+            <!-- (아직 기능 없는) 통합 검색 -->
+            <form class="hd-search" th:action="@{/search}" method="get">
+                <input class="hd-search-input"
+                       type="text" name="q"
+                       placeholder="갤러리 & 통합검색 (아직 기능 없음)">
+                <button class="hd-search-btn" type="submit">검색</button>
+            </form>
+
+            <!-- 우측 로그인 영역 -->
+            <div class="hd-right">
+                <!-- 로그인 된 경우 -->
+                <span th:if="${globalLoggedIn}">
+                    <span class="nickname" th:text="${globalNickname} + ' 님'">닉네임 님</span>
+                    <a th:href="@{/account/settings}" class="hd-link">계정설정</a>
+                    <a th:href="@{/logout}" class="hd-btn-login">로그아웃</a>
+                </span>
+
+                <!-- 비로그인인 경우 -->
+                <span th:unless="${globalLoggedIn}">
+                    <a th:href="@{/login}" class="hd-btn-login">로그인</a>
+                    <a th:href="@{/members/new}" class="hd-btn-join">회원가입</a>
+                </span>
+            </div>
+        </div>
+    </header>
+
+    <!-- 2줄째 카테고리 네비게이션 -->
+    <nav class="hd-nav">
+        <div class="hd-nav-inner">
+            <!-- 여기 boardId 는 네가 만든 보드 id 에 맞게 수정해줘 -->
+            <a th:href="@{/boards/1}" class="hd-nav-link">갤러리</a>
+            <a th:href="@{/boards/2}" class="hd-nav-link">볼링</a>
+            <a th:href="@{/boards/3}" class="hd-nav-link">유머</a>
+            <a th:href="@{/boards/4}" class="hd-nav-link">개발</a>
+            <a th:href="@{/}" class="hd-nav-link">홈</a>
+        </div>
+    </nav>
+
+</th:block>
+
+</body>
+</html>
